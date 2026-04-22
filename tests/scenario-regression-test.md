@@ -29,7 +29,7 @@ All 8 are `rdf:type ehs:ContextualComplianceActivation` in
 Every change to the TTL must preserve all three:
 
 1. **Syntactic + OWL-DL validity.** TTL parses. `robot validate-profile
-   --profile OWL2DL` passes. HermiT loads without contradiction.
+   --profile DL` passes. HermiT loads without contradiction.
 2. **Classification stability.** Under HermiT-inferred types, every
    scenario individual is **still an instance of the same set of
    classes** it was at baseline. Newly-added, more-specific subclasses
@@ -65,7 +65,7 @@ robot reason \
   --input ehs-ontology-v3.X.ttl \
   --output /tmp/reasoned.ttl
 robot validate-profile \
-  --profile OWL2DL \
+  --profile DL \
   --input ehs-ontology-v3.X.ttl
 ```
 

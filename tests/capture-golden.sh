@@ -50,11 +50,15 @@ SCENARIOS=(
 
 for s in "${SCENARIOS[@]}"; do
     echo "[capture] Types for ehs:$s"
+    # ROBOT 1.9 has no --bindings; substitute the scenario IRI into a
+    # per-run copy of the template and run that.
+    rendered="/tmp/ehs-types-$$-$s.rq"
+    sed "s|\$scenario|ehs:$s|g" "$TESTS_DIR/queries/scenario-types.rq" > "$rendered"
     robot query \
         --input "$REASONED" \
-        --query "$TESTS_DIR/queries/scenario-types.rq" \
-        "$GOLDEN_DIR/$s.types.tsv" \
-        --bindings "scenario=<http://example.org/ehs-ontology#$s>"
+        --query "$rendered" \
+        "$GOLDEN_DIR/$s.types.tsv"
+    rm -f "$rendered"
 done
 
 rm -f "$REASONED"

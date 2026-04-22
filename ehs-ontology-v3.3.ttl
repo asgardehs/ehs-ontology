@@ -3635,6 +3635,214 @@ ehs:ITAIncidentType_OtherIllness rdf:type owl:Class ;
 
 # ============================================================
 # END OF v3.3 — Commit 2 (taxonomies)
-# New properties (commit 3), SKOS mappings (commit 4), and tests
-# + CHANGELOG + README update (commit 5) land in subsequent commits.
+# ============================================================
+
+
+# ============================================================
+# v3.3 NEW PROPERTIES (12)
+# ============================================================
+# Datatype and object properties enabling OSHA ITA CSV emit.
+# Domains:
+#   - ehs:Establishment — company/org identification (4 properties)
+#   - ehs:OSHA301Report — per-incident ITA fields (8 properties)
+# ============================================================
+
+
+# ------------------------------------------------------------
+# Establishment-level properties (4)
+# ------------------------------------------------------------
+
+ehs:hasEIN rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.41 (ITA submission requirement); 26 CFR 301.6109-1 (IRS EIN issuance)" ;
+    rdfs:label "has Employer Identification Number"@en ;
+    rdfs:domain ehs:Establishment ;
+    rdfs:range xsd:string ;
+    skos:definition """The IRS-issued Employer Identification Number
+    (EIN) of the entity that controls the establishment. Required on
+    the ITA summary CSV as a unique identifier for the submitting
+    employer."""@en ;
+    rdfs:comment """The EIN on ITA is the employing entity's EIN, not
+    a facility-specific tax ID. A parent with multiple establishments
+    typically submits each establishment under the same EIN. Format is
+    9 digits, commonly displayed as XX-XXXXXXX; ITA accepts either
+    hyphenated or non-hyphenated form."""@en .
+
+ehs:hasCompanyName rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification (company_name field)" ;
+    rdfs:label "has company name"@en ;
+    rdfs:domain ehs:Establishment ;
+    rdfs:range xsd:string ;
+    skos:definition """The legal name of the parent company that owns
+    the establishment. Distinct from the establishment's own name,
+    which may be a location identifier, DBA, or plant label."""@en ;
+    rdfs:comment """ITA's company_name field records the parent legal
+    entity; the establishment_name field records the specific facility.
+    A retailer with 50 stores submits one row per store, each
+    referencing the same company_name but a distinct
+    establishment_name."""@en .
+
+ehs:hasEstablishmentSize rdf:type owl:ObjectProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.41 (size-based submission tiers)" ;
+    rdfs:label "has establishment size category"@en ;
+    rdfs:domain ehs:Establishment ;
+    rdfs:range ehs:EstablishmentSize ;
+    skos:definition """Links an establishment to one of the three size
+    categories (Small / Medium / Large) that determine ITA submission
+    obligations per 29 CFR 1904.41."""@en ;
+    rdfs:comment """Size is recorded at the time of the ITA submission
+    and is driven by the establishment's annual-average peak
+    employment count during the reporting year — not a running
+    real-time count."""@en .
+
+ehs:hasEstablishmentType rdf:type owl:ObjectProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification (establishment_type field); OSH Act Section 3(5)" ;
+    rdfs:label "has establishment type"@en ;
+    rdfs:domain ehs:Establishment ;
+    rdfs:range ehs:EstablishmentType ;
+    skos:definition """Links an establishment to its ITA sector
+    classification (Private Industry / State Government / Local
+    Government). Drives submission routing between federal OSHA and
+    State Plan authorities."""@en ;
+    rdfs:comment """The sector classification is set at the
+    establishment, not the parent — a private company performing
+    contract work under state-government supervision files as Private
+    Industry if the employer-of-record is the private company."""@en .
+
+
+# ------------------------------------------------------------
+# OSHA 301 Report (per-incident) properties (8)
+# ------------------------------------------------------------
+
+ehs:hasDaysAwayFromWork rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(3); 29 CFR 1904.7(b)(3)(v) [180-day cap]" ;
+    rdfs:label "has days away from work"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range xsd:integer ;
+    skos:definition """Calendar days the employee was unable to work
+    as a result of the incident, beginning the day after the event.
+    Capped at 180 days per 29 CFR 1904.7(b)(3)(v)."""@en ;
+    rdfs:comment """If the case is still open at the end of the
+    reporting year, record an estimated total using 29 CFR 1904.29's
+    running-count guidance. Weekend and holiday days count in the
+    total if the employee was unable to work; do not skip non-work
+    days in the calendar-day tally."""@en .
+
+ehs:hasDaysRestrictedOrTransferred rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(4); 29 CFR 1904.7(b)(4)(iii) [180-day cap]" ;
+    rdfs:label "has days restricted or transferred"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range xsd:integer ;
+    skos:definition """Calendar days the employee was restricted from
+    routine job functions or working a full shift, or transferred to
+    another job. Capped at 180 days per 29 CFR 1904.7(b)(4)(iii)."""@en ;
+    rdfs:comment """The 180-day cap is shared with
+    hasDaysAwayFromWork — the combined total across the life of a
+    single case cannot exceed 180 recorded days. If a case transitions
+    between away and restricted, the earlier state's day count
+    freezes and the later state's count continues against the shared
+    cap."""@en .
+
+ehs:hasDateOfDeath rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(2); 29 CFR 1904.39 [8-hour notification]" ;
+    rdfs:label "has date of death"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range xsd:date ;
+    skos:definition """The calendar date on which a work-related
+    fatality occurred. Required on the ITA detail CSV for any case
+    with Death as the incident outcome."""@en ;
+    rdfs:comment """Death date is recorded even when it occurs months
+    or years after the initial incident — 29 CFR 1904.7(b)(2) has no
+    time limit linking the death to the original event. If a
+    previously-recorded case transitions to fatality, update the 300
+    Log and 301 Report at the time death occurs; ITA submission for
+    that year carries the updated status."""@en .
+
+ehs:hasTreatmentFacilityType rdf:type owl:ObjectProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "has treatment facility type"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range ehs:TreatmentFacilityType ;
+    skos:definition """Links a 301 report to the type of medical
+    facility where the employee received treatment for the recorded
+    injury or illness."""@en ;
+    rdfs:comment """The type is categorical, not the specific
+    facility's name — name and address are separate 301 fields.
+    Employers who contract with a specific occupational-health
+    provider for all care typically select OCC_HEALTH."""@en .
+
+ehs:hasTimeUnknown rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 6 (time of event field)" ;
+    rdfs:label "has time-unknown flag"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range xsd:boolean ;
+    skos:definition """Boolean flag indicating the specific time of
+    the incident is unknown. Set true when the exact time cannot be
+    determined (e.g. cumulative exposure cases, delayed-reported
+    incidents)."""@en ;
+    rdfs:comment """When true, ITA accepts the time field as blank;
+    when false, an actual HH:MM value is required on submission.
+    Common for occupational illness cases where the case was diagnosed
+    well after the causal exposure."""@en .
+
+ehs:hasInjuryIllnessDescription rdf:type owl:DatatypeProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 16 (what was the injury or illness); OSHA ITA detail CSV nar_injury_illness column" ;
+    rdfs:label "has injury/illness description"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range xsd:string ;
+    skos:definition """Free-text description of the injury or illness
+    itself — body part affected, nature of the harm. Distinct from
+    hasIncidentDescription (what happened) and
+    hasActivityDescription (what the employee was doing)."""@en ;
+    rdfs:comment """ITA splits the narrative four ways: before-
+    incident (what the employee was doing), what happened (event
+    narrative), injury/illness (this field), and object/substance
+    (what directly harmed the employee). Concatenating other narrative
+    fields to fill this one degrades source data and breaks
+    round-trip import."""@en .
+
+ehs:hasITAOutcome rdf:type owl:ObjectProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification (incident_outcome field); 29 CFR 1904.7(b)(2)-(5)" ;
+    rdfs:label "has ITA incident outcome"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range ehs:ITAIncidentOutcome ;
+    skos:definition """Links a 301 report to its ITA incident outcome
+    category. Exactly one of Death, Days Away, Job Transfer or
+    Restriction, or Other Recordable applies per recordable case."""@en ;
+    rdfs:comment """This property is populated at ITA export time via
+    the SKOS mapping from the case's ehs:IncidentSeverity. It is NOT
+    manually set; it's derived. Non-recordable severities (FirstAid,
+    NearMiss, PropertyDamage, Environmental) do not yield an outcome
+    and the case itself is not exported to ITA."""@en .
+
+ehs:hasITAType rdf:type owl:ObjectProperty ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification (incident_type field); 29 CFR 1904.29 (300 Log columns F, M1-M5)" ;
+    rdfs:label "has ITA incident type"@en ;
+    rdfs:domain ehs:OSHA301Report ;
+    rdfs:range ehs:ITAIncidentType ;
+    skos:definition """Links a 301 report to its ITA injury-or-illness
+    type category. Exactly one of Injury, Skin Disorder, Respiratory
+    Condition, Poisoning, Hearing Loss, or Other Illness applies per
+    recordable case."""@en ;
+    rdfs:comment """Populated at ITA export time via the SKOS mapping
+    from the case's ehs:CaseClassification. Mirrors the 1:1
+    correspondence between CaseClassification subclasses and
+    ITAIncidentType subclasses."""@en .
+
+
+# ============================================================
+# END OF v3.3 — Commit 3 (properties)
+# SKOS mappings (commit 4) and tests + CHANGELOG + README (commit 5)
+# land in subsequent commits.
 # ============================================================

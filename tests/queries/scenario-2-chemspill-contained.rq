@@ -1,0 +1,25 @@
+## Scenario 2 — Chemical Spill in Secondary Containment (No Breach)
+##
+## Containment is the primary gate, NOT quantity. Per EPA/DOE guidance
+## DOE/EH-0447 (1995), a release into intact secondary containment is
+## not a release "to the environment" under CERCLA §101(22). No
+## CERCLA 103 / EPCRA 304 reporting fires. No transport context → no
+## DOT. Becomes a waste-disposal event: EPA RCRA + OSHA HCS.
+##
+## Routing narrows relative to Scenario 1 because the containment
+## condition is present. This ASK verifies the narrowed routing.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1206).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_ChemSpill_Contained rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:WasteHandlingAction ;
+        ehs:hasContextCondition   ehs:SecondaryContainmentArea ,
+                                  ehs:FullyContained ;
+        ehs:activatesFramework    ehs:EPA_Framework ,
+                                  ehs:OSHA_Framework .
+}

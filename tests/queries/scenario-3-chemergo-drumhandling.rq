@@ -1,0 +1,25 @@
+## Scenario 3 — Chemical + Ergonomic During Manual Drum Handling
+##
+## Multi-hazard compound activation: two hazard types fire in parallel
+## on the same task (manual drum lift-and-tilt). Chemical side fires
+## OSHA HCS + ACGIH TLV (+ skin notation for dermal). Ergonomic side
+## fires NIOSH Lifting Equation + ANSI Z365 + OSHA GDC. Both pathways
+## are active — neither cancels the other.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1238).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_ChemErgo_DrumHandling rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ,
+                                  ehs:ErgonomicHazard ;
+        ehs:hasActionContext      ehs:TransferAction ;
+        ehs:hasContextCondition   ehs:ProductionFloor ;
+        ehs:activatesFramework    ehs:OSHA_Framework ,
+                                  ehs:GHS_Framework ,
+                                  ehs:ACGIH_Framework ,
+                                  ehs:NIOSH_Framework ,
+                                  ehs:ANSI_Framework .
+}

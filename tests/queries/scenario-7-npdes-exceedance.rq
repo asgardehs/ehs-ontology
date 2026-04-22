@@ -1,0 +1,24 @@
+## Scenario 7 — NPDES Permit Exceedance at a Direct-Discharge Outfall
+##
+## Module D (CWA). Direct-discharge outfall under an NPDES individual
+## permit. Effluent-limit exceedance drives 24-hour noncompliance
+## reporting (40 CFR 122.41(l)(6)) with 5-day written follow-up and
+## monthly DMR (40 CFR 122.41(l)(7)). EPA-only routing: no OSHA unless
+## a worker exposure pathway exists during sampling/response.
+##
+## Key distinction from Scenario 8: NPDES numeric limits are
+## enforceable violations, not benchmark exceedances.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1303).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_NPDESPermitExceedance rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:ProcessingAction ;
+        ehs:hasContextCondition   ehs:WaterwayProximity ,
+                                  ehs:FullRelease ;
+        ehs:activatesFramework    ehs:EPA_Framework .
+}

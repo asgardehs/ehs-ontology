@@ -1,0 +1,24 @@
+## Scenario 1 — Chemical Spill at Loading Dock During Offloading
+##
+## Three-agency compound activation (DOT + EPA + OSHA). Transport
+## context at the dock: spill is "incidental to movement" per
+## 49 CFR 171.1(c)(2)-(3). Spill reaches ground outside containment,
+## uncontrolled, above RQ.
+##
+## This ASK must stay true across every ontology revision. Baseline
+## triples extracted from ehs-ontology-v3.2.ttl (line 1178).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_ChemSpill_LoadingDock rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:TransportAction ;
+        ehs:hasContextCondition   ehs:LoadingDock ,
+                                  ehs:FullRelease ,
+                                  ehs:AboveReportableQuantity ;
+        ehs:activatesFramework    ehs:DOT_Framework ,
+                                  ehs:EPA_Framework ,
+                                  ehs:OSHA_Framework .
+}

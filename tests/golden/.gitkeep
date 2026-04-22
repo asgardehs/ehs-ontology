@@ -1,0 +1,3 @@
+# Goldens are written here by tests/capture-golden.sh on first run
+# against a blessed ontology revision (start with v3.2). Commit the
+# resulting .types.tsv files alongside the ontology TTL they describe.

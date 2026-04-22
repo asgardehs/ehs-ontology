@@ -1,0 +1,24 @@
+## scenario-types.rq — parameterized types query
+##
+## Returns every rdf:type triple (asserted + inferred under HermiT) for
+## the bound scenario. Used for Layer 2 golden-file diffing — the test
+## fails only on triples that existed at baseline and are missing now.
+##
+## Usage:
+##   robot query --input reasoned.ttl \
+##     --query tests/queries/scenario-types.rq \
+##     --bindings "scenario=ehs:Scenario_ChemSpill_LoadingDock" \
+##     out.tsv
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT ?type
+WHERE {
+    $scenario rdf:type ?type .
+    # Exclude owl:NamedIndividual noise — every individual gets it.
+    FILTER (?type != owl:NamedIndividual)
+}
+ORDER BY ?type

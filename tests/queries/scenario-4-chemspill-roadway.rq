@@ -1,0 +1,27 @@
+## Scenario 4 — Hazmat Release on Public Roadway (transport accident)
+##
+## DOT is primary (public roadway + transport). EPA fires for release
+## above RQ. USCG fires if near navigable waters. OSHA HAZWOPER
+## applies ONLY for emergency responders at the scene — OSHA does NOT
+## regulate the driving activity itself.
+##
+## Key distinction from Scenario 1: no loading-dock → different
+## OSHA applicability (response only vs. facility HCS). Framework set
+## is DOT + EPA + USCG (not DOT + EPA + OSHA as at the dock).
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1255).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_ChemSpill_Roadway rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:TransportAction ;
+        ehs:hasContextCondition   ehs:PublicRoadway ,
+                                  ehs:FullRelease ,
+                                  ehs:AboveReportableQuantity ;
+        ehs:activatesFramework    ehs:DOT_Framework ,
+                                  ehs:EPA_Framework ,
+                                  ehs:USCG_Framework .
+}

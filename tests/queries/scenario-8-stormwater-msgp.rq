@@ -1,0 +1,24 @@
+## Scenario 8 — Industrial Stormwater MSGP Benchmark Exceedance
+##
+## Module D (CWA). Multi-Sector General Permit (MSGP) benchmark
+## exceedance at a stormwater outfall. MSGP Sector AA (fabricated
+## metals) — total zinc benchmark 0.12 mg/L. Benchmarks are NOT
+## effluent limits — exceedance triggers MSGP Part 6 corrective-action
+## ladder (Tier 1/2/3), not enforcement. EPA-only routing.
+##
+## Key distinction from Scenario 7: benchmarks drive SWPPP review and
+## BMP modification, not 24-hour noncompliance reports.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1337).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_StormwaterOutfall_MSGP rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:ProcessingAction ;
+        ehs:hasContextCondition   ehs:WaterwayProximity ,
+                                  ehs:FullRelease ;
+        ehs:activatesFramework    ehs:EPA_Framework .
+}

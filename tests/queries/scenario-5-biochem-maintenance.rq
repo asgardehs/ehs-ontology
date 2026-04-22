@@ -1,0 +1,25 @@
+## Scenario 5 — Healthcare Decon: Biological + Chemical During Maintenance
+##
+## Multi-hazard + confined space + maintenance. Worker enters autoclave
+## room (PRCS) with residual biological contamination + glutaraldehyde
+## vapor. Three OSHA standards fire simultaneously: BBP, HCS, PRCS.
+## LOTO fires because it's maintenance. Bio/chem waste is RCRA mixed
+## waste. NIOSH REL more protective than OSHA PEL for glutaraldehyde.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1270).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_BioChemMaintenance rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:BiologicalHazard ,
+                                  ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:MaintenanceAction ;
+        ehs:hasContextCondition   ehs:ConfinedSpace ;
+        ehs:activatesFramework    ehs:OSHA_Framework ,
+                                  ehs:EPA_Framework ,
+                                  ehs:NIOSH_Framework ,
+                                  ehs:GHS_Framework ,
+                                  ehs:ACGIH_Framework .
+}

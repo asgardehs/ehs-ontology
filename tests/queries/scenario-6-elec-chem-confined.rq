@@ -1,0 +1,25 @@
+## Scenario 6 — Electrical + Flammable Chemical in Confined Space
+##
+## Multi-hazard compound risk: electrical (arc flash) meets flammable
+## atmosphere (below LEL but present). NFPA 70 hazardous-location
+## classification determines whether intrinsically safe tools are
+## required. Neither single-type activation would fully cover this
+## alone — the compound risk is the point.
+##
+## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1287).
+
+PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+ASK {
+    ehs:Scenario_ElecChemConfined rdf:type ehs:ContextualComplianceActivation ;
+        ehs:triggeredByType       ehs:ElectricalHazard ,
+                                  ehs:ChemicalHazard ;
+        ehs:hasActionContext      ehs:MaintenanceAction ;
+        ehs:hasContextCondition   ehs:ConfinedSpace ;
+        ehs:activatesFramework    ehs:OSHA_Framework ,
+                                  ehs:NFPA_Framework ,
+                                  ehs:ANSI_Framework ,
+                                  ehs:GHS_Framework ,
+                                  ehs:ACGIH_Framework .
+}

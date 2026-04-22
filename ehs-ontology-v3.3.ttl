@@ -3032,5 +3032,609 @@ ehs:triggersComplianceActivation rdf:type owl:ObjectProperty ;
 
 
 # ============================================================
-# END OF v3.2
+# END OF v3.2 BASELINE
+# ============================================================
+
+
+# ============================================================
+# v3.3 ADDITIONS: OSHA ITA CSV EXPORT
+# ============================================================
+# v3.3 adds the vocabulary needed to translate Odin's internal OSHA
+# 300 taxonomies (severity levels, case classifications) into the
+# Injury Tracking Application (ITA) CSV submission vocabulary per
+# 29 CFR 1904.41.
+#
+# Modeling style follows v3.2: all new taxonomies are owl:Class
+# hierarchies (subClassOf their scheme root). SKOS is used as an
+# annotation vocabulary (skos:definition, skos:notation,
+# skos:prefLabel) and as the mapping vocabulary (skos:exactMatch,
+# skos:broadMatch — added in the mappings commit that follows).
+#
+# Per v3.3's citation-first rule, every new and enriched construct
+# carries rdfs:isDefinedBy (version anchor), dcterms:source (specific
+# CFR citation where applicable), skos:notation (bridging code to
+# Odin's SQL seed), and rdfs:comment (pedagogical explanation tying
+# the concept back to the cited regulation).
+#
+# Retrofit note: the full v3.2 ontology does not yet carry
+# dcterms:source / skos:notation on every class. v4.0 sweeps those
+# onto all legacy content; v3.3 restricts retrofits to the specific
+# IncidentSeverity subclasses the ITA export depends on.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# ENRICHMENT: Existing IncidentSeverity subclasses (v3.2)
+# Adds citation, version anchor, SQL-bridge notation, and (where
+# absent) a pedagogical rdfs:comment. Existing rdfs:label and
+# skos:definition triples on these classes are unchanged.
+# ------------------------------------------------------------
+
+ehs:Fatality
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(2)" ;
+    skos:notation "FATALITY" ;
+    rdfs:comment """Compliance routing: a fatality also triggers the
+    8-hour notification obligation at 29 CFR 1904.39(a) independent of
+    the 300 Log and ITA submission. Investigate as though every
+    fatality will be the subject of OSHA enforcement — because most
+    are."""@en .
+
+ehs:LostTimeIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(3)" ;
+    skos:notation "LOST_TIME" ;
+    rdfs:comment """Day-count cap of 180 days applies per 29 CFR
+    1904.7(b)(3)(v). A case that generates 200 days away is recorded
+    as 180. If the case transitions between days-away and restricted
+    work mid-stream, the 180-day cap still applies across the whole
+    case, not per state."""@en .
+
+ehs:RestrictedDutyIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(4)" ;
+    skos:notation "RESTRICTED" ;
+    rdfs:comment """'Routine function' is defined at 29 CFR
+    1904.7(b)(4)(ii) as a function the employee regularly performs
+    at least once per week. A restriction that does not cross a
+    routine function does not trigger this severity — use
+    MedicalTreatmentIncident or FirstAidIncident depending on the
+    treatment received."""@en .
+
+ehs:MedicalTreatmentIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(5)" ;
+    skos:notation "MEDICAL_TX" ;
+    rdfs:comment """The status of who provided treatment is irrelevant
+    under 29 CFR 1904.7(b)(5)(i) — an employee taking prescription
+    medication at home counts the same as a doctor administering it.
+    The list of what qualifies as first-aid is closed (29 CFR
+    1904.7(b)(5)(ii)); anything not on it is medical treatment by
+    definition."""@en .
+
+ehs:FirstAidIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(5)(ii) [first aid list]" ;
+    skos:notation "FIRST_AID" ;
+    rdfs:comment """FirstAidIncident does NOT flow to ITA export.
+    The ontology represents this non-recordability via the absence
+    of a skos:exactMatch to ehs:ITAIncidentOutcome_Death / DaysAway /
+    JobTransferOrRestriction / OtherRecordable. The absence itself
+    is the regulatory fact."""@en .
+
+ehs:NearMiss
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Recommended Practices for Safety and Health Programs (non-regulatory); ANSI Z10; ISO 45001" ;
+    skos:notation "NEAR_MISS" .
+
+ehs:PropertyDamageIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "Internal tracking (non-regulatory)" ;
+    skos:notation "PROPERTY" ;
+    rdfs:comment """Property damage incidents are often predictive of
+    future injury incidents — the same conditions that break equipment
+    can hurt people. Investigating property damage with the same rigor
+    as a recordable case is a leading-indicator discipline. No OSHA
+    recordkeeping obligation attaches."""@en .
+
+ehs:EnvironmentalIncident
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "40 CFR 302 (CERCLA); 40 CFR 355 (EPCRA Section 304); 40 CFR 110/117/122 (CWA); state environmental programs" ;
+    skos:notation "ENVIRONMENTAL" .
+
+
+# ------------------------------------------------------------
+# NEW: Case Classification subclasses (6)
+# Populates the bare ehs:CaseClassification root declared in v3.2.
+# Maps 1:1 to OSHA 300 Log columns F (injury) and M1-M5 (illness).
+# ------------------------------------------------------------
+
+ehs:InjuryCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.46 (definition); OSHA 300 Log Column F" ;
+    rdfs:label "Injury Case"@en ;
+    skos:notation "INJURY" ;
+    skos:definition """A wound or damage to the body resulting from
+    an event in the work environment (29 CFR 1904.46). Examples: cuts,
+    fractures, sprains, amputations, chemical splash injuries where
+    the effect is immediate tissue damage."""@en ;
+    rdfs:comment """The injury/illness boundary is defined by
+    mechanism, not by severity. A chemical splash producing immediate
+    tissue damage is an injury (Column F). The same chemical producing
+    a delayed respiratory condition weeks later is an illness
+    (Column M2)."""@en .
+
+ehs:SkinDisorderCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M1; 29 CFR 1904.29" ;
+    rdfs:label "Skin Disorder Case"@en ;
+    skos:notation "SKIN" ;
+    skos:definition """An illness involving the skin caused by work
+    exposure. Examples: contact dermatitis, eczema, chrome ulcers,
+    chemically-induced inflammation."""@en ;
+    rdfs:comment """Distinguish from an InjuryCase: acute trauma (a
+    cut, a burn) goes under Column F even when affecting skin. Column
+    M1 is reserved for illness-type conditions developed from
+    exposure."""@en .
+
+ehs:RespiratoryConditionCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M2; 29 CFR 1904.29" ;
+    rdfs:label "Respiratory Condition Case"@en ;
+    skos:notation "RESP" ;
+    skos:definition """Illness affecting the respiratory system from
+    workplace exposure. Examples: silicosis, asbestosis, occupational
+    asthma, pneumoconiosis, farmer's lung."""@en ;
+    rdfs:comment """Acute chemical pneumonitis from a single exposure
+    event typically stays under Column F as an injury; chronic or
+    cumulative respiratory conditions go under Column M2 as
+    illnesses."""@en .
+
+ehs:PoisoningCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M3; 29 CFR 1904.29" ;
+    rdfs:label "Poisoning Case"@en ;
+    skos:notation "POISON" ;
+    skos:definition """Systemic illness from absorbed toxic substances.
+    Examples: lead poisoning, carbon monoxide poisoning, pesticide
+    toxicity, solvent toxicity confirmed by biological monitoring."""@en ;
+    rdfs:comment """The boundary between PoisoningCase, SkinDisorderCase,
+    and RespiratoryConditionCase turns on systemic versus local effect.
+    Benzene causing aplastic anemia is poisoning (M3); benzene causing
+    dermatitis is a skin disorder (M1); benzene causing chemical
+    pneumonitis is respiratory (M2)."""@en .
+
+ehs:HearingLossCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.10; OSHA 300 Log Column M4" ;
+    rdfs:label "Hearing Loss Case"@en ;
+    skos:notation "HEARING" ;
+    skos:definition """Standard Threshold Shift (STS) per 29 CFR
+    1904.10: average 10+ dB change at 2000, 3000, and 4000 Hz in
+    either ear, AND total hearing level at 25+ dB above audiometric
+    zero averaged at the same frequencies."""@en ;
+    rdfs:comment """STS is the first filter; recordability also
+    requires work-relatedness per 29 CFR 1904.5. Both conditions must
+    hold. The age-correction adjustment at 29 CFR 1904.10(b)(3) may
+    reduce the STS below threshold, which removes the case from
+    recordability — verify the employer's PLHCP applied the correction
+    before recording."""@en .
+
+ehs:OtherIllnessCase rdf:type owl:Class ;
+    rdfs:subClassOf ehs:CaseClassification ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M5; 29 CFR 1904.29" ;
+    rdfs:label "All Other Illnesses Case"@en ;
+    skos:notation "OTHER_ILL" ;
+    skos:definition """Occupational illness not falling under M1-M4.
+    Examples: heat stroke, heat exhaustion, frostbite, bloodborne-
+    pathogen exposures with seroconversion, contagious diseases,
+    decompression sickness."""@en ;
+    rdfs:comment """M5 is the catch-all for illnesses. If a case is an
+    illness (not an injury) and doesn't fit skin / respiratory /
+    poisoning / hearing-loss, it goes here. The 301 Incident Report's
+    illness description provides granularity that M5 itself lacks."""@en .
+
+
+# ------------------------------------------------------------
+# NEW: Establishment Size taxonomy (3)
+# Closed enum per 29 CFR 1904.41 submission-requirement tiers.
+# ------------------------------------------------------------
+
+ehs:EstablishmentSize rdf:type owl:Class ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.41 (electronic submission of injury and illness records)" ;
+    rdfs:label "Establishment Size Category"@en ;
+    skos:definition """Establishment headcount category used by OSHA
+    ITA to determine submission obligations. Boundaries track 29 CFR
+    1904.41's submission tiers."""@en ;
+    rdfs:comment """Sizing is by annual-average peak employment count
+    at the establishment level, not the parent company. A company with
+    10,000 total employees across 50 small stores has 50 small
+    establishments for ITA purposes, not one large one."""@en .
+
+ehs:EstablishmentSize_Small rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentSize ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.1(a)(1); 29 CFR 1904.41 (exemption threshold)" ;
+    rdfs:label "Small Establishment (≤ 19 employees)"@en ;
+    skos:notation "SMALL" ;
+    skos:definition """Establishment with 19 or fewer employees at any
+    point during the calendar year. Partially exempt from 29 CFR 1904
+    recordkeeping unless in a non-partially-exempt industry (29 CFR
+    1904 Appendix A)."""@en ;
+    rdfs:comment """Small establishments in non-exempt industries
+    (construction, manufacturing, etc.) still must maintain the 300
+    Log but are NOT required to submit it electronically via ITA."""@en .
+
+ehs:EstablishmentSize_Medium rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentSize ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.41(a)(2)" ;
+    rdfs:label "Medium Establishment (20–249 employees)"@en ;
+    skos:notation "MEDIUM" ;
+    skos:definition """Establishment with 20 to 249 employees. Must
+    submit 300A summary electronically via ITA if in a designated
+    high-hazard industry per 29 CFR 1904.41 Appendix A to Subpart E."""@en ;
+    rdfs:comment """Industry-dependent. A 100-employee legal office
+    has no ITA submission obligation; a 100-employee sawmill does.
+    Always check NAICS against 29 CFR 1904.41 Appendix A before
+    assuming."""@en .
+
+ehs:EstablishmentSize_Large rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentSize ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.41(a)(1)" ;
+    rdfs:label "Large Establishment (≥ 250 employees)"@en ;
+    skos:notation "LARGE" ;
+    skos:definition """Establishment with 250 or more employees. Must
+    submit full 300 Log, 300A summary, AND 301 Incident Reports
+    electronically via ITA regardless of industry."""@en ;
+    rdfs:comment """The 2023 final rule expanded the 250+ tier to
+    include 301 submission — prior to 2024 only 300A was required at
+    this tier. Applies per-establishment: a large parent with several
+    small establishments files by each establishment's own headcount."""@en .
+
+
+# ------------------------------------------------------------
+# NEW: Establishment Type taxonomy (3)
+# Drives ITA submission routing (federal OSHA vs State Plan).
+# ------------------------------------------------------------
+
+ehs:EstablishmentType rdf:type owl:Class ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification (establishment_type field); OSH Act Section 3(5); 29 CFR 1956" ;
+    rdfs:label "Establishment Type"@en ;
+    skos:definition """Sector classification required by OSHA ITA to
+    route the submission to the correct jurisdiction: federal OSHA for
+    private industry, State Plan authority for public-sector
+    establishments in State Plan states."""@en ;
+    rdfs:comment """Compliance routing teaching point: OSHA
+    jurisdiction is not monolithic. Federal OSHA covers most private
+    employers; about half of U.S. states have approved State Plans
+    covering private AND public employers; some State Plans cover only
+    public-sector employees. The establishment type determines which
+    authority processes the ITA submission."""@en .
+
+ehs:EstablishmentType_PrivateIndustry rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSH Act of 1970, Section 3(5); 29 CFR 1975" ;
+    rdfs:label "Private Industry Establishment"@en ;
+    skos:notation "PRIVATE" ;
+    skos:definition """Non-governmental employer engaged in a business
+    affecting interstate commerce. Default federal OSHA jurisdiction
+    unless superseded by an approved State Plan."""@en ;
+    rdfs:comment """Sole proprietors with no employees other than
+    immediate family members are excluded from OSHA jurisdiction per
+    29 CFR 1975.4(b)(2) — these are not 'private industry' for ITA
+    purposes and do not file."""@en .
+
+ehs:EstablishmentType_StateGovernment rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSH Act Section 3(5) [excludes state government from federal OSHA]; 29 CFR 1956" ;
+    rdfs:label "State Government Establishment"@en ;
+    skos:notation "STATE_GOV" ;
+    skos:definition """State-level government employer. Covered ONLY
+    in states with OSHA-approved State Plans — federal OSHA has no
+    jurisdiction over state or local government employees."""@en ;
+    rdfs:comment """In non-State-Plan states (Texas, Alabama, etc.),
+    state government employees have no OSHA coverage at all. This is
+    a frequent source of confusion for new compliance professionals
+    assuming OSHA is universal."""@en .
+
+ehs:EstablishmentType_LocalGovernment rdf:type owl:Class ;
+    rdfs:subClassOf ehs:EstablishmentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSH Act Section 3(5); 29 CFR 1956" ;
+    rdfs:label "Local Government Establishment"@en ;
+    skos:notation "LOCAL_GOV" ;
+    skos:definition """County, city, or other political-subdivision
+    government employer. Same State Plan coverage logic as state
+    government — federal OSHA has no jurisdiction over local
+    government employees."""@en ;
+    rdfs:comment """Some State Plans (Connecticut, Illinois, Maine,
+    New Jersey, New York, Virgin Islands) cover ONLY public-sector
+    employees. In those jurisdictions, private-sector employers file
+    with federal OSHA while public-sector employers file with the
+    State Plan."""@en .
+
+
+# ------------------------------------------------------------
+# NEW: Treatment Facility Type taxonomy (7)
+# Per OSHA 301 Form Item 15 and ITA CSV treatment_facility_type.
+# ------------------------------------------------------------
+
+ehs:TreatmentFacilityType rdf:type owl:Class ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 (Injury and Illness Incident Report), Item 15; ITA Technical Specification" ;
+    rdfs:label "Treatment Facility Type"@en ;
+    skos:definition """Type of medical facility where the injured or
+    ill employee received treatment, per OSHA Form 301 Item 15.
+    Required on the ITA detail CSV for each recordable case."""@en ;
+    rdfs:comment """The facility type does not affect recordability
+    (settled at severity level) but does affect the 301 record's
+    regulatory and epidemiological use. 'Occupational health clinic'
+    vs 'Physician's office' vs 'Hospital ER' tells a different story
+    about the case's acuity and the employer's medical-management
+    program."""@en .
+
+ehs:TreatmentFacilityType_HospitalER rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Hospital Emergency Room"@en ;
+    skos:notation "HOSPITAL_ER" ;
+    skos:definition """Emergency department of a hospital. Typically
+    associated with acute, unscheduled care."""@en ;
+    rdfs:comment """ER utilization correlates with cases meeting 29
+    CFR 1904.39 reporting thresholds (in-patient hospitalization,
+    amputation, eye loss). When ER treatment is recorded, verify
+    whether the 24-hour OSHA notification obligation at 1904.39 was
+    also triggered."""@en .
+
+ehs:TreatmentFacilityType_HospitalOutpatient rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Hospital Outpatient Clinic"@en ;
+    skos:notation "HOSPITAL_OP" ;
+    skos:definition """Scheduled, non-emergency care at a hospital-
+    affiliated outpatient clinic."""@en ;
+    rdfs:comment """Distinguished from the ER by scheduling and
+    acuity. Follow-up visits for a case initially seen in the ER are
+    typically recorded against the initial facility, not the follow-up
+    location."""@en .
+
+ehs:TreatmentFacilityType_PhysiciansOffice rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Physician's Office"@en ;
+    skos:notation "PHYSICIAN" ;
+    skos:definition """Private physician's office, non-hospital-
+    affiliated, not specialized for occupational medicine."""@en ;
+    rdfs:comment """Common for routine injuries at employers without
+    an on-site health service or occupational health contract."""@en .
+
+ehs:TreatmentFacilityType_UrgentCare rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Urgent Care Center"@en ;
+    skos:notation "URGENT_CARE" ;
+    skos:definition """Walk-in urgent-care facility providing
+    non-emergency acute care without appointment."""@en ;
+    rdfs:comment """Distinct from 'Occupational Health Clinic' —
+    urgent care serves the general population; occupational health
+    clinics specialize in work-related injury and illness and
+    typically hold employer contracts."""@en .
+
+ehs:TreatmentFacilityType_OccupationalHealthClinic rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Occupational Health Clinic"@en ;
+    skos:notation "OCC_HEALTH" ;
+    skos:definition """Clinic specializing in work-related injury and
+    illness, typically under contract with one or more employers."""@en ;
+    rdfs:comment """The PLHCP at an occupational health clinic is
+    often the same entity making OSHA-significant determinations like
+    STS for hearing loss (29 CFR 1904.10), which makes the relationship
+    between employer and clinic operationally important."""@en .
+
+ehs:TreatmentFacilityType_Other rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15" ;
+    rdfs:label "Other Facility"@en ;
+    skos:notation "OTHER" ;
+    skos:definition """A medical facility not matching any other
+    category (e.g. on-site first-aid room with a nurse, ambulance-
+    only treatment without transport to a facility)."""@en ;
+    rdfs:comment """Use sparingly. On-site first-aid-only treatment
+    typically means the case itself is classified FirstAidIncident
+    (non-recordable) and no 301 is filed, so OTHER would be rare in
+    practice."""@en .
+
+ehs:TreatmentFacilityType_Unknown rdf:type owl:Class ;
+    rdfs:subClassOf ehs:TreatmentFacilityType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA Form 301 Item 15 (allows missing data)" ;
+    rdfs:label "Unknown Facility"@en ;
+    skos:notation "UNKNOWN" ;
+    skos:definition """Treatment facility not known at the time of 301
+    completion."""@en ;
+    rdfs:comment """Acceptable for backfilled historical records but
+    should not be used for current-year incidents — the employer has a
+    duty under 29 CFR 1904.33 to maintain accurate records."""@en .
+
+
+# ------------------------------------------------------------
+# NEW: ITA Incident Outcome taxonomy (4)
+# Maps 1:1 to 29 CFR 1904.7(b)(2)-(5) recordable outcomes.
+# ------------------------------------------------------------
+
+ehs:ITAIncidentOutcome rdf:type owl:Class ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification; 29 CFR 1904.7(b)(2)-(5)" ;
+    rdfs:label "ITA Incident Outcome"@en ;
+    skos:definition """The outcome classification used by OSHA ITA for
+    each recordable case. Exactly four values, each aligning with one
+    of the four outcome tiers of 29 CFR 1904.7(b): death, days away
+    from work, restricted work or job transfer, and other recordable
+    (medical treatment only)."""@en ;
+    rdfs:comment """The four-way outcome classification is the
+    ontological shape of OSHA recordkeeping itself — every other
+    recording criterion at 29 CFR 1904.7-10 ultimately manifests as
+    one of these four outcomes on the 300 Log."""@en .
+
+ehs:ITAIncidentOutcome_Death rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentOutcome ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(2)" ;
+    rdfs:label "Death (ITA outcome)"@en ;
+    skos:notation "DEATH" ;
+    skos:definition """Work-related fatality. Checked in ITA column G
+    of the detail CSV."""@en ;
+    rdfs:comment """Also triggers the 8-hour notification obligation
+    at 29 CFR 1904.39(a) — independent of the ITA submission, which is
+    annual."""@en .
+
+ehs:ITAIncidentOutcome_DaysAway rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentOutcome ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(3)" ;
+    rdfs:label "Days Away From Work (ITA outcome)"@en ;
+    skos:notation "DAYS_AWAY" ;
+    skos:definition """Case involves one or more calendar days away
+    from work beyond the day of the event. Checked in ITA column H
+    of the detail CSV."""@en ;
+    rdfs:comment """Day-count cap of 180 days applies. For cases that
+    transition between days-away and restricted, classify by the
+    condition present at case closure — if the employee is away at
+    closure, it is days-away."""@en .
+
+ehs:ITAIncidentOutcome_JobTransferOrRestriction rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentOutcome ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(4)" ;
+    rdfs:label "Job Transfer or Restriction (ITA outcome)"@en ;
+    skos:notation "JOB_TRANSFER_RESTRICTION" ;
+    skos:definition """Case involves restricted work or transfer to
+    another job, but no days away beyond the event day. Checked in
+    ITA column I of the detail CSV."""@en ;
+    rdfs:comment """If the case involved both restriction AND days
+    away, classify as DaysAway, not JobTransferOrRestriction. The
+    outcome categories are mutually exclusive; pick the most
+    severe."""@en .
+
+ehs:ITAIncidentOutcome_OtherRecordable rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentOutcome ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.7(b)(5); 29 CFR 1904.7(b)(6)-(10)" ;
+    rdfs:label "Other Recordable (ITA outcome)"@en ;
+    skos:notation "OTHER_RECORDABLE" ;
+    skos:definition """Recordable case that did not result in death,
+    days away, job transfer, or restriction — typically medical
+    treatment beyond first aid only. Checked in ITA column J of the
+    detail CSV."""@en ;
+    rdfs:comment """The 'default' recordable outcome bucket. If none
+    of Death / DaysAway / JobTransferOrRestriction apply but the case
+    still meets a recording criterion (medical treatment, loss of
+    consciousness, significant diagnosed condition, needlestick,
+    hearing loss, medical removal), it lands here."""@en .
+
+
+# ------------------------------------------------------------
+# NEW: ITA Incident Type taxonomy (6)
+# ITA's injury-vs-illness vocabulary. Maps 1:1 to the 6 new
+# CaseClassification subclasses above.
+# ------------------------------------------------------------
+
+ehs:ITAIncidentType rdf:type owl:Class ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA ITA Technical Specification; 29 CFR 1904.29 (300 Log columns F, M1-M5)" ;
+    rdfs:label "ITA Incident Type"@en ;
+    skos:definition """The injury-or-illness classification used by
+    OSHA ITA. Six values: one for injury (300 Log column F) and five
+    illness categories (columns M1-M5). Maps 1:1 to the ontology's
+    CaseClassification subclasses."""@en ;
+    rdfs:comment """This class is the ITA-side mirror of
+    ehs:CaseClassification. The two were structurally identical in
+    OSHA's 2024 ITA rollout; any future ITA reclassification that
+    breaks the 1:1 correspondence will require updating the mapping
+    triples in this ontology but not the CaseClassification
+    subclasses themselves."""@en .
+
+ehs:ITAIncidentType_Injury rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column F; 29 CFR 1904.46" ;
+    rdfs:label "Injury (ITA type)"@en ;
+    skos:notation "INJURY" ;
+    skos:definition """Physical wound or damage to the body resulting
+    from a workplace event. Maps to OSHA 300 Log column F and to
+    ehs:InjuryCase."""@en ;
+    rdfs:comment """The mechanism-vs-exposure boundary between injury
+    and illness applies here identically to the 300 Log — acute trauma
+    is injury; cumulative or delayed exposure effect is illness."""@en .
+
+ehs:ITAIncidentType_SkinDisorder rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M1" ;
+    rdfs:label "Skin Disorder (ITA type)"@en ;
+    skos:notation "SKIN_DISORDER" ;
+    skos:definition """Occupational skin illness. Maps to OSHA 300 Log
+    column M1 and to ehs:SkinDisorderCase."""@en .
+
+ehs:ITAIncidentType_RespiratoryCondition rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M2" ;
+    rdfs:label "Respiratory Condition (ITA type)"@en ;
+    skos:notation "RESPIRATORY_CONDITION" ;
+    skos:definition """Occupational respiratory illness. Maps to OSHA
+    300 Log column M2 and to ehs:RespiratoryConditionCase."""@en .
+
+ehs:ITAIncidentType_Poisoning rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M3" ;
+    rdfs:label "Poisoning (ITA type)"@en ;
+    skos:notation "POISONING" ;
+    skos:definition """Systemic toxic-exposure illness. Maps to OSHA
+    300 Log column M3 and to ehs:PoisoningCase."""@en .
+
+ehs:ITAIncidentType_HearingLoss rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "29 CFR 1904.10; OSHA 300 Log Column M4" ;
+    rdfs:label "Hearing Loss (ITA type)"@en ;
+    skos:notation "HEARING_LOSS" ;
+    skos:definition """Standard Threshold Shift per 29 CFR 1904.10.
+    Maps to OSHA 300 Log column M4 and to ehs:HearingLossCase."""@en .
+
+ehs:ITAIncidentType_OtherIllness rdf:type owl:Class ;
+    rdfs:subClassOf ehs:ITAIncidentType ;
+    rdfs:isDefinedBy <http://example.org/ehs-ontology> ;
+    dcterms:source "OSHA 300 Log Column M5" ;
+    rdfs:label "All Other Illnesses (ITA type)"@en ;
+    skos:notation "OTHER_ILLNESS" ;
+    skos:definition """Occupational illness not matching skin,
+    respiratory, poisoning, or hearing-loss. Maps to OSHA 300 Log
+    column M5 and to ehs:OtherIllnessCase."""@en .
+
+
+# ============================================================
+# END OF v3.3 — Commit 2 (taxonomies)
+# New properties (commit 3), SKOS mappings (commit 4), and tests
+# + CHANGELOG + README update (commit 5) land in subsequent commits.
 # ============================================================

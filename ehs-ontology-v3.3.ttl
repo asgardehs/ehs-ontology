@@ -3843,6 +3843,115 @@ ehs:hasITAType rdf:type owl:ObjectProperty ;
 
 # ============================================================
 # END OF v3.3 — Commit 3 (properties)
-# SKOS mappings (commit 4) and tests + CHANGELOG + README (commit 5)
-# land in subsequent commits.
+# ============================================================
+
+
+# ============================================================
+# v3.3 SKOS MAPPINGS: Odin taxonomies → ITA vocabulary
+# ============================================================
+# Declarative translation layer. These triples drive the SQL
+# ita_outcome_mapping and ita_case_type_mapping seed tables in
+# odin's Phase 4a.2; if OSHA reclassifies ITA codes, adjust the
+# mappings here and the SQL seeds regenerate from them.
+#
+# Note on modeling: skos:exactMatch is defined on skos:Concept but
+# RDF allows its use between any two IRIs. Applying it to
+# owl:Class pairs here expresses "these two classes denote the
+# same concept" without requiring punning or owl:equivalentClass
+# (which HermiT would reason over more heavily and which would
+# imply the subclass extensions are identical — too strong, since
+# v3.3's ITA classes exist only as export targets, not as case
+# record types in their own right).
+# ============================================================
+
+
+# ------------------------------------------------------------
+# CaseClassification → ITAIncidentType (6 mappings, all 1:1)
+# ------------------------------------------------------------
+
+ehs:InjuryCase
+    skos:exactMatch ehs:ITAIncidentType_Injury ;
+    rdfs:comment """ITA maps injury cases identically to the OSHA 300
+    Log Column F. No transformation needed; the mapping exists so
+    export tooling can traverse case → ITA code declaratively."""@en .
+
+ehs:SkinDisorderCase
+    skos:exactMatch ehs:ITAIncidentType_SkinDisorder .
+
+ehs:RespiratoryConditionCase
+    skos:exactMatch ehs:ITAIncidentType_RespiratoryCondition .
+
+ehs:PoisoningCase
+    skos:exactMatch ehs:ITAIncidentType_Poisoning .
+
+ehs:HearingLossCase
+    skos:exactMatch ehs:ITAIncidentType_HearingLoss .
+
+ehs:OtherIllnessCase
+    skos:exactMatch ehs:ITAIncidentType_OtherIllness .
+
+
+# ------------------------------------------------------------
+# IncidentSeverity → ITAIncidentOutcome
+# Four recordable severities map exactMatch. Four non-recordable
+# severities deliberately have NO mapping — the absence expresses
+# the regulatory fact that these cases do not flow to ITA.
+# ------------------------------------------------------------
+
+ehs:Fatality
+    skos:exactMatch ehs:ITAIncidentOutcome_Death ;
+    rdfs:comment """Fatality → Death outcome is exactMatch, but note
+    that ITA export is NOT the only reporting channel for a fatality.
+    The 8-hour OSHA notification at 29 CFR 1904.39(a) fires
+    immediately on the day of the event and is independent of the
+    annual ITA submission cycle."""@en .
+
+ehs:LostTimeIncident
+    skos:exactMatch ehs:ITAIncidentOutcome_DaysAway .
+
+ehs:RestrictedDutyIncident
+    skos:exactMatch ehs:ITAIncidentOutcome_JobTransferOrRestriction .
+
+ehs:MedicalTreatmentIncident
+    skos:exactMatch ehs:ITAIncidentOutcome_OtherRecordable ;
+    rdfs:comment """MedicalTreatmentIncident maps to OtherRecordable
+    because the ITA 'other recordable' bucket is the catch-all for
+    cases meeting a recording criterion (medical treatment, LOC,
+    significant diagnosis, needlestick, hearing loss, medical
+    removal) without rising to death, days away, or restriction.
+    Medical-treatment-only cases are the most common occupant of this
+    bucket."""@en .
+
+# --- Non-mapped severities (explicit documentation of absence) ---
+
+ehs:FirstAidIncident
+    rdfs:comment """NOT mapped to any ehs:ITAIncidentOutcome. First-
+    aid-only incidents are excluded from OSHA 300 Log recording per
+    29 CFR 1904.7(b)(5)(ii) and therefore do not appear in ITA
+    exports. The absence of a skos:exactMatch triple on this class is
+    the normative statement of that regulatory fact."""@en .
+
+ehs:NearMiss
+    rdfs:comment """NOT mapped to any ehs:ITAIncidentOutcome. Near-
+    miss events have no recorded outcome by definition (no injury,
+    illness, or damage occurred) and are not subject to 29 CFR 1904
+    recordkeeping. Tracked internally only."""@en .
+
+ehs:PropertyDamageIncident
+    rdfs:comment """NOT mapped to any ehs:ITAIncidentOutcome. Property
+    damage without human injury is outside OSHA 1904's scope and
+    therefore outside ITA."""@en .
+
+ehs:EnvironmentalIncident
+    rdfs:comment """NOT mapped to any ehs:ITAIncidentOutcome.
+    Environmental incidents route through EPA / EPCRA / CERCLA / CWA
+    reporting channels, not OSHA. A single physical event (e.g. a
+    chemical spill that injures an employee) can simultaneously
+    produce an EnvironmentalIncident record AND a separate severity
+    record for the worker injury; only the latter flows to ITA."""@en .
+
+
+# ============================================================
+# END OF v3.3 — Commit 4 (SKOS mappings)
+# Tests + CHANGELOG + README bump land in commit 5.
 # ============================================================

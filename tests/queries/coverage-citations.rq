@@ -1,0 +1,34 @@
+## Coverage — Citation-first rule (v3.3+)
+##
+## Enforces v3.3's citation-first rule: every class, property, or
+## named individual added in v3.3 or later MUST carry both
+## dcterms:source (regulatory citation) and at least one rdfs:comment
+## (plain-English explanation tying the concept to the cited reg —
+## the pedagogical payload).
+##
+## Scoping: resources added in v3.3+ self-identify by carrying
+##   rdfs:isDefinedBy <http://example.org/ehs-ontology>
+## This scope excludes legacy v3.2 content, which will be retrofitted
+## in v4.0 and at that point this scope widens via the migration plan.
+##
+## ASK returns TRUE if every scoped resource passes. ASK returns
+## FALSE (suite fail) if any scoped resource lacks dcterms:source OR
+## lacks rdfs:comment.
+
+PREFIX ehs:     <http://example.org/ehs-ontology#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+ASK {
+    FILTER NOT EXISTS {
+        ?scoped rdfs:isDefinedBy <http://example.org/ehs-ontology> .
+        FILTER ( ?scoped != <http://example.org/ehs-ontology> )
+        {
+            FILTER NOT EXISTS { ?scoped dcterms:source ?src . }
+        }
+        UNION
+        {
+            FILTER NOT EXISTS { ?scoped rdfs:comment ?cmt . }
+        }
+    }
+}

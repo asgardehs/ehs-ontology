@@ -1,0 +1,53 @@
+## Scenario 9 — OSHA ITA CSV Export Routing (v3.3)
+##
+## Validates the v3.3 ITA vocabulary wiring: the 4 recordable
+## IncidentSeverity subclasses each have the expected skos:exactMatch
+## to an ITAIncidentOutcome subclass, and all 6 CaseClassification
+## subclasses each have the expected skos:exactMatch to an
+## ITAIncidentType subclass.
+##
+## Also asserts that the 4 non-recordable severities (FirstAidIncident,
+## NearMiss, PropertyDamageIncident, EnvironmentalIncident) carry NO
+## skos:exactMatch to any ITAIncidentOutcome — the absence of that
+## mapping is the normative statement that these cases do NOT flow to
+## ITA export.
+##
+## This ASK must stay true across every ontology revision at and
+## above v3.3.
+
+PREFIX ehs:  <http://example.org/ehs-ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+ASK {
+    # --- Recordable severity → ITA outcome (4 positive mappings) ---
+    ehs:Fatality                 skos:exactMatch ehs:ITAIncidentOutcome_Death .
+    ehs:LostTimeIncident         skos:exactMatch ehs:ITAIncidentOutcome_DaysAway .
+    ehs:RestrictedDutyIncident   skos:exactMatch ehs:ITAIncidentOutcome_JobTransferOrRestriction .
+    ehs:MedicalTreatmentIncident skos:exactMatch ehs:ITAIncidentOutcome_OtherRecordable .
+
+    # --- Case classification → ITA type (6 positive mappings) ---
+    ehs:InjuryCase                 skos:exactMatch ehs:ITAIncidentType_Injury .
+    ehs:SkinDisorderCase           skos:exactMatch ehs:ITAIncidentType_SkinDisorder .
+    ehs:RespiratoryConditionCase   skos:exactMatch ehs:ITAIncidentType_RespiratoryCondition .
+    ehs:PoisoningCase              skos:exactMatch ehs:ITAIncidentType_Poisoning .
+    ehs:HearingLossCase            skos:exactMatch ehs:ITAIncidentType_HearingLoss .
+    ehs:OtherIllnessCase           skos:exactMatch ehs:ITAIncidentType_OtherIllness .
+
+    # --- Non-recordable severities must NOT map to any ITA outcome ---
+    FILTER NOT EXISTS {
+        ehs:FirstAidIncident       skos:exactMatch ?ita1 .
+        ?ita1 rdfs:subClassOf* ehs:ITAIncidentOutcome .
+    }
+    FILTER NOT EXISTS {
+        ehs:NearMiss               skos:exactMatch ?ita2 .
+        ?ita2 rdfs:subClassOf* ehs:ITAIncidentOutcome .
+    }
+    FILTER NOT EXISTS {
+        ehs:PropertyDamageIncident skos:exactMatch ?ita3 .
+        ?ita3 rdfs:subClassOf* ehs:ITAIncidentOutcome .
+    }
+    FILTER NOT EXISTS {
+        ehs:EnvironmentalIncident  skos:exactMatch ?ita4 .
+        ?ita4 rdfs:subClassOf* ehs:ITAIncidentOutcome .
+    }
+}

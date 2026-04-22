@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # run.sh — ontology regression suite
 #
-# Three layers, run in order. Stops on first failure.
-#   [1/3] Consistency   — HermiT loads, OWL-DL profile validates
-#   [2/3] Classification — inferred-type set is a superset of baseline
-#   [3/3] Routing        — 8 hand-authored ASK queries must all return true
+# Four layers, run in order. Stops on first failure.
+#   [1/4] Consistency    — HermiT loads, OWL-DL profile validates
+#   [2/4] Classification — inferred-type set is a superset of baseline
+#   [3/4] Routing        — scenario-*.rq ASK queries must all return true
+#   [4/4] Coverage       — coverage-*.rq ASK queries enforce metadata
+#                          rules (citation-first from v3.3 onward)
 #
 # Usage:
 #   tests/run.sh [path-to-ontology.ttl]
@@ -34,7 +36,7 @@ test -f "$ONTOLOGY_PATH" || {
 cleanup() { rm -f "$REASONED" /tmp/ehs-types-$$-*.tsv; }
 trap cleanup EXIT
 
-echo "[1/3] Consistency..."
+echo "[1/4] Consistency..."
 robot reason \
     --reasoner hermit \
     --input "$ONTOLOGY_PATH" \
@@ -53,7 +55,7 @@ then
 fi
 echo "      OK"
 
-echo "[2/3] Classification (goldens)..."
+echo "[2/4] Classification (goldens)..."
 SCENARIOS=(
     Scenario_ChemSpill_LoadingDock
     Scenario_ChemSpill_Contained
@@ -91,7 +93,7 @@ for s in "${SCENARIOS[@]}"; do
     echo "      OK   $s"
 done
 
-echo "[3/3] Routing (ASK competency queries)..."
+echo "[3/4] Routing (ASK competency queries)..."
 for q in "$QUERIES_DIR"/scenario-*.rq; do
     # scenario-types.rq is the parameterized helper, not a competency query.
     [[ "$q" == *scenario-types.rq ]] && continue
@@ -109,5 +111,26 @@ for q in "$QUERIES_DIR"/scenario-*.rq; do
     echo "      OK   $name"
 done
 
+echo "[4/4] Coverage (metadata rules)..."
+shopt -s nullglob
+coverage_files=( "$QUERIES_DIR"/coverage-*.rq )
+shopt -u nullglob
+if [[ ${#coverage_files[@]} -eq 0 ]]; then
+    echo "      SKIP (no coverage-*.rq queries present)"
+else
+    for q in "${coverage_files[@]}"; do
+        name="$(basename "$q" .rq)"
+        out="/tmp/ehs-ask-$$-$name.txt"
+        robot query --input "$REASONED" --query "$q" "$out" 2>/dev/null
+        if ! grep -q '^true' "$out"; then
+            echo "      FAIL $name — ASK returned false"
+            echo "          (coverage rule violated — see $q)"
+            exit 1
+        fi
+        rm -f "$out"
+        echo "      OK   $name"
+    done
+fi
+
 echo
-echo "All scenario regressions passed for $ONTOLOGY."
+echo "All regression layers passed for $ONTOLOGY."

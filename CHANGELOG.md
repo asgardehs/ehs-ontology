@@ -8,6 +8,117 @@ Version numbers track the value in `owl:versionInfo` inside the ontology file.
 
 ---
 
+## v3.3 — 2026-04-22
+
+**Theme:** OSHA ITA CSV export vocabulary + citation-first rule.
+
+Adds the taxonomies and properties needed for Odin to emit OSHA
+Injury Tracking Application (ITA) CSV submissions per 29 CFR 1904.41.
+Establishes "citation-first" as a binding rule for all new ontology
+content: every class, property, and individual added at or after v3.3
+must carry a regulatory citation (`dcterms:source`), a version anchor
+(`rdfs:isDefinedBy`), and a plain-English `rdfs:comment` tying the
+concept back to the cited regulation.
+
+Legacy v3.2 content is not yet retrofitted — that sweep is v4.0 work
+and is explicitly excluded from v3.3's coverage check.
+
+### Added
+
+**Enrichments on existing `ehs:IncidentSeverity` subclasses (8):**
+- `ehs:Fatality`, `ehs:LostTimeIncident`, `ehs:RestrictedDutyIncident`,
+  `ehs:MedicalTreatmentIncident`, `ehs:FirstAidIncident`, `ehs:NearMiss`,
+  `ehs:PropertyDamageIncident`, `ehs:EnvironmentalIncident` each gain
+  `rdfs:isDefinedBy`, `dcterms:source` (specific CFR subsection where
+  applicable), `skos:notation` (bridges to Odin's SQL seed codes), and
+  (where v3.2 lacked one) an `rdfs:comment` with the pedagogical hook.
+
+**New `ehs:CaseClassification` subclasses (6):**
+- `ehs:InjuryCase`, `ehs:SkinDisorderCase`, `ehs:RespiratoryConditionCase`,
+  `ehs:PoisoningCase`, `ehs:HearingLossCase`, `ehs:OtherIllnessCase`.
+  Populates the previously-bare v3.2 root class. Maps 1:1 to OSHA 300
+  Log columns F and M1-M5 (per 29 CFR 1904.29).
+
+**New ITA taxonomies (23 classes across 5 roots):**
+- `ehs:EstablishmentSize` + 3 subclasses (Small / Medium / Large) for
+  29 CFR 1904.41 submission tiers.
+- `ehs:EstablishmentType` + 3 subclasses (PrivateIndustry / State-
+  Government / LocalGovernment) for federal-vs-State-Plan routing.
+- `ehs:TreatmentFacilityType` + 7 subclasses for OSHA Form 301 Item 15.
+- `ehs:ITAIncidentOutcome` + 4 subclasses aligned with 29 CFR 1904.7(b)(2)-(5).
+- `ehs:ITAIncidentType` + 6 subclasses 1:1 with CaseClassification.
+
+**New properties (12):**
+- Establishment-level: `ehs:hasEIN`, `ehs:hasCompanyName`,
+  `ehs:hasEstablishmentSize`, `ehs:hasEstablishmentType`.
+- OSHA 301 per-incident: `ehs:hasDaysAwayFromWork`,
+  `ehs:hasDaysRestrictedOrTransferred`, `ehs:hasDateOfDeath`,
+  `ehs:hasTreatmentFacilityType`, `ehs:hasTimeUnknown`,
+  `ehs:hasInjuryIllnessDescription`, `ehs:hasITAOutcome`,
+  `ehs:hasITAType`.
+
+**SKOS mappings (10 triples + 4 absence statements):**
+- 6 `skos:exactMatch` from `CaseClassification` subclasses to
+  `ITAIncidentType` subclasses (1:1).
+- 4 `skos:exactMatch` from recordable `IncidentSeverity` subclasses
+  (Fatality, LostTimeIncident, RestrictedDutyIncident,
+  MedicalTreatmentIncident) to `ITAIncidentOutcome` subclasses.
+- The other 4 `IncidentSeverity` subclasses (FirstAidIncident,
+  NearMiss, PropertyDamageIncident, EnvironmentalIncident)
+  deliberately carry NO mapping; each gets an `rdfs:comment`
+  explaining the regulatory basis for the absence.
+
+**New test queries:**
+- `tests/queries/scenario-9-ita-export.rq` — ASK that the 10 SKOS
+  exactMatch triples exist and the 4 absences hold. Joins the
+  existing 8-scenario routing-invariant suite.
+- `tests/queries/coverage-citations.rq` — ASK that every resource
+  carrying `rdfs:isDefinedBy` (i.e. v3.3+ content) also has
+  `dcterms:source` and at least one `rdfs:comment`. Enforces the
+  citation-first rule.
+
+**Test runner:**
+- `tests/run.sh` gains a `[4/4] Coverage` layer that globs
+  `coverage-*.rq` alongside the existing `[3/4] Routing` layer
+  (`scenario-*.rq`). Preexisting usage and contract unchanged.
+
+### Modeling notes
+
+- All new taxonomies use `owl:Class` + `rdfs:subClassOf` to match v3.2
+  style; SKOS is used as an annotation vocabulary
+  (`skos:prefLabel`, `skos:notation`, `skos:definition`) and as a
+  mapping vocabulary (`skos:exactMatch`, `skos:broadMatch`), not as
+  a parallel concept-scheme taxonomy. A SKOS-concept-scheme migration
+  across the whole ontology is a candidate for v4.0 but out of scope
+  here.
+- Property domains split cleanly between `ehs:Establishment` (for
+  org-identifying fields) and `ehs:OSHA301Report` (for per-incident
+  fields). No new domain class introduced.
+- Case-classification subclasses use the "Case" suffix
+  (`ehs:InjuryCase`, etc.) to preserve common domain names like
+  `ehs:Injury` for potential future use. ITA classes use the
+  prefixed pattern `ehs:ITAIncidentOutcome_Death` etc. to namespace
+  the export-layer vocabulary away from domain concepts.
+
+### Regression test status
+
+- 8 existing scenario ASKs (`scenario-1-` through
+  `scenario-8-stormwater-msgp`) unaffected by v3.3 — they exercise
+  compliance-activation routing that does not overlap the new ITA
+  export surface. Goldens under `tests/golden/` remain valid.
+- 1 new scenario ASK (`scenario-9-ita-export`) added.
+- 1 new coverage ASK (`coverage-citations`) added.
+
+### Not yet done (tracked for v4.0)
+
+- Citation retrofit across all v3.2 content.
+- EHS Geo-Compliance Extension implementation (design exists at
+  `extension/EHS Geo-Compliance Extension.md`; TTL not yet authored).
+- Possible migration of owl:Class taxonomies to SKOS concept schemes
+  — requires a design decision; out of scope for v3.3.
+
+---
+
 ## v3.2 — 2026-04-20 → 2026-04-21
 
 **Theme:** Module D (Clean Water Act) — new regulatory-program module parallel

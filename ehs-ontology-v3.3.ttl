@@ -3593,7 +3593,12 @@ ehs:ITAIncidentType_SkinDisorder rdf:type owl:Class ;
     rdfs:label "Skin Disorder (ITA type)"@en ;
     skos:notation "SKIN_DISORDER" ;
     skos:definition """Occupational skin illness. Maps to OSHA 300 Log
-    column M1 and to ehs:SkinDisorderCase."""@en .
+    column M1 and to ehs:SkinDisorderCase."""@en ;
+    rdfs:comment """1:1 mirror of ehs:SkinDisorderCase. The two IRIs
+    exist because the domain-side class describes the case kind and
+    the ITA-side class describes the export code; keeping them
+    separate lets future ITA reclassifications break the mapping
+    without disturbing the case-kind taxonomy."""@en .
 
 ehs:ITAIncidentType_RespiratoryCondition rdf:type owl:Class ;
     rdfs:subClassOf ehs:ITAIncidentType ;
@@ -3602,7 +3607,9 @@ ehs:ITAIncidentType_RespiratoryCondition rdf:type owl:Class ;
     rdfs:label "Respiratory Condition (ITA type)"@en ;
     skos:notation "RESPIRATORY_CONDITION" ;
     skos:definition """Occupational respiratory illness. Maps to OSHA
-    300 Log column M2 and to ehs:RespiratoryConditionCase."""@en .
+    300 Log column M2 and to ehs:RespiratoryConditionCase."""@en ;
+    rdfs:comment """1:1 mirror of ehs:RespiratoryConditionCase —
+    exists as an ITA export code distinct from the case-kind class."""@en .
 
 ehs:ITAIncidentType_Poisoning rdf:type owl:Class ;
     rdfs:subClassOf ehs:ITAIncidentType ;
@@ -3611,7 +3618,9 @@ ehs:ITAIncidentType_Poisoning rdf:type owl:Class ;
     rdfs:label "Poisoning (ITA type)"@en ;
     skos:notation "POISONING" ;
     skos:definition """Systemic toxic-exposure illness. Maps to OSHA
-    300 Log column M3 and to ehs:PoisoningCase."""@en .
+    300 Log column M3 and to ehs:PoisoningCase."""@en ;
+    rdfs:comment """1:1 mirror of ehs:PoisoningCase — exists as an ITA
+    export code distinct from the case-kind class."""@en .
 
 ehs:ITAIncidentType_HearingLoss rdf:type owl:Class ;
     rdfs:subClassOf ehs:ITAIncidentType ;
@@ -3620,7 +3629,12 @@ ehs:ITAIncidentType_HearingLoss rdf:type owl:Class ;
     rdfs:label "Hearing Loss (ITA type)"@en ;
     skos:notation "HEARING_LOSS" ;
     skos:definition """Standard Threshold Shift per 29 CFR 1904.10.
-    Maps to OSHA 300 Log column M4 and to ehs:HearingLossCase."""@en .
+    Maps to OSHA 300 Log column M4 and to ehs:HearingLossCase."""@en ;
+    rdfs:comment """1:1 mirror of ehs:HearingLossCase — exists as an
+    ITA export code distinct from the case-kind class. Note that OSHA
+    uses two naming conventions here: 'Hearing Loss' on the 300 Log
+    and in ITA, but 'STS' (Standard Threshold Shift) in the recording
+    criteria at 29 CFR 1904.10 itself."""@en .
 
 ehs:ITAIncidentType_OtherIllness rdf:type owl:Class ;
     rdfs:subClassOf ehs:ITAIncidentType ;
@@ -3630,7 +3644,10 @@ ehs:ITAIncidentType_OtherIllness rdf:type owl:Class ;
     skos:notation "OTHER_ILLNESS" ;
     skos:definition """Occupational illness not matching skin,
     respiratory, poisoning, or hearing-loss. Maps to OSHA 300 Log
-    column M5 and to ehs:OtherIllnessCase."""@en .
+    column M5 and to ehs:OtherIllnessCase."""@en ;
+    rdfs:comment """1:1 mirror of ehs:OtherIllnessCase — exists as an
+    ITA export code distinct from the case-kind class. The catch-all
+    nature of M5 is inherited unchanged from ehs:CaseClassification."""@en .
 
 
 # ============================================================

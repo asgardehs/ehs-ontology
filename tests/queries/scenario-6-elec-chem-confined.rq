@@ -6,9 +6,9 @@
 ## required. Neither single-type activation would fully cover this
 ## alone — the compound risk is the point.
 ##
-## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1287).
+## Baseline triples extracted from ehs-ontology-v3.2.0.ttl (line 1287).
 
-PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX ehs: <https://w3id.org/asgardehs/ehs#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 ASK {

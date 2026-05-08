@@ -9,13 +9,18 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix ehs:   <http://example.org/ehs-ontology#> .
+@prefix :      <https://w3id.org/asgardehs/ehs#> .
+@prefix ehs:   <https://w3id.org/asgardehs/ehs#> .
+
+@base <https://w3id.org/asgardehs/ehs> .
 
 # ============================================================
 # ONTOLOGY HEADER
 # ============================================================
 
-<http://example.org/ehs-ontology> rdf:type owl:Ontology ;
+<https://w3id.org/asgardehs/ehs> rdf:type owl:Ontology ;
+    owl:versionIRI    <https://w3id.org/asgardehs/ehs/2.0.0> ;
+    owl:versionInfo   "2.0.0" ;
     dcterms:title "EHS Ontology: Employee–Hazard Bipolar Model"@en ;
     dcterms:description """An ontology for Environmental Health & Safety (EHS) management
     structured as a bipolar model with Employee and Hazard as the two poles, mediated by
@@ -33,20 +38,11 @@
 
     Integrates the ARECC decision-making framework (Anticipate, Recognize, Evaluate,
     Control, Confirm) and the Hierarchy of Controls."""@en ;
-    dcterms:creator "Synthesized from Badea et al. (2024), AIHA ARECC Framework, OSHA HCS, and IH foundational principles" ;
-    dcterms:date "2026-04-08"^^xsd:date ;
-    owl:versionInfo "2.0" ;
-    rdfs:comment """v2.0 additions:
-    - CompoundHazardProfile: multi-type overlap scenarios where a single situation
-      involves multiple HazardTypes, firing the union of all constituent regulatory frameworks.
-    - ActionContext taxonomy: the action being performed at the time of an incident
-      (Transportation, Storage, Maintenance, Emergency Response, Waste Handling, etc.)
-      which modifies which regulatory frameworks activate.
-    - ContextualCondition modifiers: ContainmentStatus, LocationContext, QuantityThreshold
-      that further refine the regulatory routing.
-    - ContextualComplianceActivation: the full routing class that combines HazardType(s) +
-      ActionContext + ContextualConditions to determine the precise set of frameworks fired.
-    - Worked scenario instances demonstrating the routing logic."""@en .
+    dcterms:creator   "Adam J. Bick" ;
+    dcterms:issued    "2026-04-08"^^xsd:date ;
+    dcterms:modified  "2026-04-08"^^xsd:date ;
+    dcterms:license   <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "See CHANGELOG.md for version history."@en .
 
 
 # ============================================================

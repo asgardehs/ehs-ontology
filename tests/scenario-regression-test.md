@@ -2,7 +2,7 @@
 
 **Purpose:** Before merging any ontology change (v3.2 → v3.3 and
 beyond), verify that the **8 worked scenarios** in
-`ehs-ontology-v3.X.ttl` still classify to the same parent classes and
+`ehs-ontology-v3.X.0.ttl` still classify to the same parent classes and
 still route to the same regulatory frameworks they did at baseline.
 This is the ontology's integration test: the scenarios are named
 individuals asserting concrete compliance routes, and the paper's
@@ -11,7 +11,7 @@ claims rest on those routes staying stable.
 ## Scenarios under test
 
 All 8 are `rdf:type ehs:ContextualComplianceActivation` in
-`ehs-ontology-v3.2.ttl`:
+`ehs-ontology-v3.2.0.ttl`:
 
 | Scenario IRI                                 | Domain |
 | -------------------------------------------- | ------ |
@@ -62,11 +62,11 @@ hood, scriptable. Useful if ROBOT install is friction.
 ```shell
 robot reason \
   --reasoner hermit \
-  --input ehs-ontology-v3.X.ttl \
+  --input ehs-ontology-v3.X.0.ttl \
   --output /tmp/reasoned.ttl
 robot validate-profile \
   --profile DL \
-  --input ehs-ontology-v3.X.ttl
+  --input ehs-ontology-v3.X.0.ttl
 ```
 
 Catches: parse errors, unsat classes, OWL-DL profile violations. ~5s
@@ -78,7 +78,7 @@ on a modern laptop.
 under `tests/golden/`):
 
 ```shell
-./tests/capture-golden.sh ehs-ontology-v3.2.ttl
+./tests/capture-golden.sh ehs-ontology-v3.2.0.ttl
 ```
 
 That script runs `queries/scenario-types.rq` parameterized over each
@@ -107,8 +107,8 @@ loudly if any returns false.
 
 ```
 ehs-ontology/
-├── ehs-ontology-v3.2.ttl          # current
-├── ehs-ontology-v3.3.ttl          # candidate (future)
+├── ehs-ontology-v3.2.0.ttl          # current
+├── ehs-ontology-v3.3.0.ttl          # candidate (future)
 ├── tests/
 │   ├── scenario-regression-test.md    # this file
 │   ├── run.sh                         # top-level runner
@@ -132,7 +132,7 @@ ehs-ontology/
 ```shell
 # Full suite (consistency + classification + routing), against a
 # chosen ontology:
-./tests/run.sh ehs-ontology-v3.2.ttl
+./tests/run.sh ehs-ontology-v3.2.0.ttl
 
 # Or default (latest):
 ./tests/run.sh

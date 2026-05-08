@@ -6,9 +6,9 @@
 ## uncontrolled, above RQ.
 ##
 ## This ASK must stay true across every ontology revision. Baseline
-## triples extracted from ehs-ontology-v3.2.ttl (line 1178).
+## triples extracted from ehs-ontology-v3.2.0.ttl (line 1178).
 
-PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX ehs: <https://w3id.org/asgardehs/ehs#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 ASK {

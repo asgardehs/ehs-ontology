@@ -9,9 +9,9 @@
 ## Key distinction from Scenario 7: benchmarks drive SWPPP review and
 ## BMP modification, not 24-hour noncompliance reports.
 ##
-## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1337).
+## Baseline triples extracted from ehs-ontology-v3.2.0.ttl (line 1337).
 
-PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX ehs: <https://w3id.org/asgardehs/ehs#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 ASK {

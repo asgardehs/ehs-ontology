@@ -2,7 +2,7 @@
 
 ## Files
 
-- **ehs-ontology-v3.3.ttl** — The EHS Ontology (OWL/Turtle). Current
+- **ehs-ontology-v3.3.0.ttl** — The EHS Ontology (OWL/Turtle). Current
   version. Four regulatory-program modules plus one operational module:
   - Module A: EPCRA Tier II / TRI (chemical inventory reporting)
   - Module B: Title V / CAA (air permitting)
@@ -21,14 +21,14 @@
   carry `dcterms:source` (regulatory citation) and `rdfs:comment`
   (plain-English explanation). Enforced by
   `tests/queries/coverage-citations.rq`.
-- **ehs-ontology-v3.2.ttl** — Prior stable release. Retained in-repo
+- **ehs-ontology-v3.2.0.ttl** — Prior stable release. Retained in-repo
   (not yet archived) as a reference during the v3.2 → v3.3 migration
   of downstream consumers (odin submodule pointer, research paper
   citations). Will move to `.archive/` once v3.3 has bedded in.
 - **CHANGELOG.md** — Version history.
 - **docs/plans/** — In-flight plan documents (v3.3 + Mimir viewer).
 - **.archive/** — Prior ontology versions retained for provenance
-  (v3.1, v3-merged, v3-extension, and the original ehs-ontology.ttl).
+  (v3.1.0, v3-merged, v3-extension, and the original ehs-ontology-v2.0.0.ttl).
 - **EHS Geo-Compliance Extension.md** — Design document for the fourth
   routing axis (FacilityJurisdiction). Adds state/county/city regulatory
   overlays on top of the federal baseline. Implementation is v4.0 work.

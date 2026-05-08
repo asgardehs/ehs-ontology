@@ -15,7 +15,7 @@
 ## This ASK must stay true across every ontology revision at and
 ## above v3.3.
 
-PREFIX ehs:  <http://example.org/ehs-ontology#>
+PREFIX ehs:  <https://w3id.org/asgardehs/ehs#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 

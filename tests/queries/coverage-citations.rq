@@ -7,7 +7,7 @@
 ## the pedagogical payload).
 ##
 ## Scoping: resources added in v3.3+ self-identify by carrying
-##   rdfs:isDefinedBy <http://example.org/ehs-ontology>
+##   rdfs:isDefinedBy <https://w3id.org/asgardehs/ehs>
 ## This scope excludes legacy v3.2 content, which will be retrofitted
 ## in v4.0 and at that point this scope widens via the migration plan.
 ##
@@ -15,14 +15,14 @@
 ## FALSE (suite fail) if any scoped resource lacks dcterms:source OR
 ## lacks rdfs:comment.
 
-PREFIX ehs:     <http://example.org/ehs-ontology#>
+PREFIX ehs:     <https://w3id.org/asgardehs/ehs#>
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
 ASK {
     FILTER NOT EXISTS {
-        ?scoped rdfs:isDefinedBy <http://example.org/ehs-ontology> .
-        FILTER ( ?scoped != <http://example.org/ehs-ontology> )
+        ?scoped rdfs:isDefinedBy <https://w3id.org/asgardehs/ehs> .
+        FILTER ( ?scoped != <https://w3id.org/asgardehs/ehs> )
         {
             FILTER NOT EXISTS { ?scoped dcterms:source ?src . }
         }

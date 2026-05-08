@@ -9,9 +9,9 @@
 ## OSHA applicability (response only vs. facility HCS). Framework set
 ## is DOT + EPA + USCG (not DOT + EPA + OSHA as at the dock).
 ##
-## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1255).
+## Baseline triples extracted from ehs-ontology-v3.2.0.ttl (line 1255).
 
-PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX ehs: <https://w3id.org/asgardehs/ehs#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 ASK {

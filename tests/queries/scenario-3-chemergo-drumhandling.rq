@@ -6,9 +6,9 @@
 ## fires NIOSH Lifting Equation + ANSI Z365 + OSHA GDC. Both pathways
 ## are active — neither cancels the other.
 ##
-## Baseline triples extracted from ehs-ontology-v3.2.ttl (line 1238).
+## Baseline triples extracted from ehs-ontology-v3.2.0.ttl (line 1238).
 
-PREFIX ehs: <http://example.org/ehs-ontology#>
+PREFIX ehs: <https://w3id.org/asgardehs/ehs#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 ASK {

@@ -8,7 +8,7 @@
 # Usage:
 #   tests/capture-golden.sh [path-to-ontology.ttl]
 #
-# Default input is ehs-ontology-v3.2.ttl in the repo root.
+# Default input is ehs-ontology-v3.2.0.ttl in the repo root.
 #
 # Re-run when a scenario's inferred-type set legitimately changes
 # (class reclassification, new subclass hierarchy, etc.). Review the
@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-ONTOLOGY="${1:-ehs-ontology-v3.2.ttl}"
+ONTOLOGY="${1:-ehs-ontology-v3.2.0.ttl}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ONTOLOGY_PATH="$REPO_ROOT/$ONTOLOGY"
 TESTS_DIR="$REPO_ROOT/tests"

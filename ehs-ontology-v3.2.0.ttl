@@ -9,13 +9,19 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix ehs:   <http://example.org/ehs-ontology#> .
+@prefix :      <https://w3id.org/asgardehs/ehs#> .
+@prefix ehs:   <https://w3id.org/asgardehs/ehs#> .
+
+@base <https://w3id.org/asgardehs/ehs> .
 
 # ============================================================
 # ONTOLOGY HEADER
 # ============================================================
 
-<http://example.org/ehs-ontology> rdf:type owl:Ontology ;
+<https://w3id.org/asgardehs/ehs> rdf:type owl:Ontology ;
+    owl:versionIRI    <https://w3id.org/asgardehs/ehs/3.2.0> ;
+    owl:versionInfo   "3.2.0" ;
+    owl:priorVersion  <https://w3id.org/asgardehs/ehs/3.1.0> ;
     dcterms:title "EHS Ontology: Employee–Hazard Bipolar Model"@en ;
     dcterms:description """An ontology for Environmental Health & Safety (EHS) management
     structured as a bipolar model with Employee and Hazard as the two poles, mediated by
@@ -33,20 +39,11 @@
 
     Integrates the ARECC decision-making framework (Anticipate, Recognize, Evaluate,
     Control, Confirm) and the Hierarchy of Controls."""@en ;
-    dcterms:creator "Synthesized from Badea et al. (2024), AIHA ARECC Framework, OSHA HCS, and IH foundational principles" ;
-    dcterms:date "2026-04-20"^^xsd:date ;
-    owl:versionInfo "3.2" ;
-    rdfs:comment """v2.0 additions:
-    - CompoundHazardProfile: multi-type overlap scenarios where a single situation
-      involves multiple HazardTypes, firing the union of all constituent regulatory frameworks.
-    - ActionContext taxonomy: the action being performed at the time of an incident
-      (Transportation, Storage, Maintenance, Emergency Response, Waste Handling, etc.)
-      which modifies which regulatory frameworks activate.
-    - ContextualCondition modifiers: ContainmentStatus, LocationContext, QuantityThreshold
-      that further refine the regulatory routing.
-    - ContextualComplianceActivation: the full routing class that combines HazardType(s) +
-      ActionContext + ContextualConditions to determine the precise set of frameworks fired.
-    - Worked scenario instances demonstrating the routing logic."""@en .
+    dcterms:creator   "Adam J. Bick" ;
+    dcterms:issued    "2026-04-20"^^xsd:date ;
+    dcterms:modified  "2026-04-20"^^xsd:date ;
+    dcterms:license   <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "See CHANGELOG.md for version history."@en .
 
 
 # ============================================================
@@ -1398,79 +1395,6 @@ ehs:shiftsJurisdiction rdf:type owl:ObjectProperty ;
     rdfs:domain ehs:LocationContext ;
     rdfs:range ehs:RegulatoryFramework ;
     skos:definition "A location context shifts primary jurisdiction from one framework to another. E.g., PublicRoadway shifts primary from OSHA to DOT."@en .
-
-
-# ============================================================
-
-# ============================================================
-
-<http://example.org/ehs-ontology> owl:versionInfo "3.2" ;
-    rdfs:comment """v3.0 additions:
-    MODULE A — EPCRA Tier II / Chemical Inventory Reporting (Sections 302, 311, 312):
-      Chemical inventory management classes linking OSHA HCS chemicals to EPCRA
-      reporting thresholds, EHS designation, TPQ, and SERC/LEPC/Fire Department
-      notification requirements.
-
-    MODULE B — Title V / Clean Air Act Air Permitting:
-      Emission unit modeling, Potential-to-Emit (PTE) calculations, pollutant type
-      taxonomy (criteria pollutants, HAPs, VOCs), major source thresholds,
-      permit structure, Compliance Assurance Monitoring (CAM), and applicable
-      technology standards (MACT, NSPS, NESHAP).
-
-    MODULE C — OSHA 300 Recordkeeping (29 CFR 1904):
-      Injury/illness recording decision model including work-relatedness
-      determination, recording criteria (death, DART, medical treatment beyond
-      first aid, loss of consciousness, significant diagnosis), first aid
-      definition boundary, case classification, forms (300/300A/301), rate
-      calculations (TRIR, DART, LTIR), and electronic submission (ITA).
-
-    MODULE D — Clean Water Act Discharge & Monitoring:
-      Water pollutant taxonomy (conventional, priority, non-conventional, WET),
-      discharge points (including stormwater outfalls), monitoring locations,
-      water control devices (treatment units, passive structural controls,
-      stormwater devices), and stormwater planning (SWPPPs and BMPs). Parallel
-      in shape to Module B but adapted for water's end-of-pipe regulation at
-      discharge points rather than source-level regulation of emission units.
-
-    OPERATIONAL — Employee Incident Management (cross-cutting, non-regulatory):
-      Extends existing Outcome hierarchy (Accident, Incident, OccupationalDisease)
-      with investigation workflow, root cause analysis methods, corrective action
-      tracking, and connects incidents back to the ARECC framework and
-      Hierarchy of Controls already in the ontology.
-
-    v3.1 additions:
-    - Establishment class: facility/site-level anchor for chemical inventory, OSHA 300
-      recordkeeping, and ITA electronic submission (rewires hasChemicalInventory domain).
-    - TRI Section 313 expansion: TRIChemical subclass, Form R/Form A reporting,
-      activity thresholds, de minimis concentration exemptions, release quantity linkage
-      to EmissionUnit, automotive paint-line chemical instances.
-    - Cross-module wiring: InventoryChemical↔EmissionUnit, Employee→EmissionUnit,
-      IncidentSeverity↔RecordingCriteria alignment, EnvironmentalIncident→
-      ContextualComplianceActivation, rdfs:range fixes on addressedByControl and
-      connectsToARECC, hasRecordingCriteria domain widened to Outcome.
-
-    v3.2 additions:
-    - Module D (Clean Water Act): new regulatory-program module parallel to Module B.
-      Water pollutant taxonomy (WaterPollutant → Conventional/Priority/
-      NonConventional → WholeEffluentToxicity); physical infrastructure
-      (DischargePoint, StormwaterOutfall, MonitoringLocation); water control
-      equipment (WaterControlDevice ← WastewaterTreatmentUnit); stormwater
-      planning (SWPPP, BestManagementPractice); regulatory-program classes
-      (NPDESPermit ⊂ Permit, POTWDischargePermit ⊂ Permit, PretreatmentStandard);
-      object properties (dischargesTo, monitoredAt, sampledFor, subjectToPermit,
-      coveredBy, implements).
-    - Cross-program Permit umbrella: new ehs:Permit superclass introduced so CWA
-      permits (NPDESPermit, POTWDischargePermit) share a hierarchy with air
-      permits (TitleVPermit, FESOP — retrofitted as subClassOf ehs:Permit).
-      PretreatmentStandard is deliberately NOT under ehs:Permit — it is a
-      generally-applicable regulatory standard, not a site-specific authorization.
-    - Reconciliation: ehs:WaterwayProximity narrowed to site geography (CWA
-      permitting substance moved to Module D); ehs:EnvironmentalIncident gets
-      a CWA-linkage rdfs:comment pointing at the NPDESPermit / DischargePoint /
-      dischargesTo chain.
-    - Module D (Employee Incident Management) promoted to OPERATIONAL — the
-      content is unchanged but the name was reallocated to Clean Water Act to
-      preserve the letter scheme for regulatory-program modules (A/B/C/D)."""@en .
 
 
 # ############################################################
